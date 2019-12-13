@@ -53,12 +53,27 @@ def save_image(url,filename):
             print("保存图片时超时了")
 
 
-# def compare_blogger(bloggername):
-#     """比对博主是否是已经抓取过的博主"""
-
-
-
-
+def compare_blogger(bloggername):
+    """比对博主是否是已经抓取过的博主"""
+    nb = bloggername
+    print("nb是",nb)
+    nms = set()
+    # # 遍历Image目录下的分类子目录
+    for nm in os.listdir("Image"):
+        # print("nm是",nm)
+        # print(os.path.abspath("Image/"+nm))
+        # 获取分类目录下的博主名字
+        for i in os.listdir(os.path.abspath("Image/"+nm)):
+            try:
+                nms.add(re.search(r".*(?=\_\d+$)", i).group())
+            except AttributeError:
+                pass
+        print("文件列表", nms)
+        # 判断一下博主已经抓取过
+        if nb in nms:
+            print("重复抓取了博主，直接返回程序")
+            print("抓取的这个博主是", nb)
+            return True
 
 
 def extract_blogger(arg = "feed/dailylook"):
@@ -154,16 +169,8 @@ def extract_id():
             # 得到抓取到的博主的名字
             nb = p.search(user_link).group()
             print("用户名是",nb)
-            nms = set()
-            for nm in os.listdir("Image"):
-                try:
-                    nms.add(re.search(r".*(?=\_\d+$)", nm).group())
-                except AttributeError:
-                    pass
-            print("文件列表",nms)
-            if nb in nms:
-                print("重复抓取了博主，直接返回程序")
-                print("抓取的这个博主是",nb)
+            # 博主在目录里
+            if  compare_blogger(nb):
                 continue
 
 
