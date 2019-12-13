@@ -53,12 +53,20 @@ def save_image(url,filename):
             print("保存图片时超时了")
 
 
-# def compare_blogger(bloggername):
-#     """比对博主是否是已经抓取过的博主"""
+def compare_blogger(bloggername):
+    """比对博主是否是已经抓取过的博主"""
+    nms = set()
 
-
-
-
+    for nm in os.listdir("Image"):
+        try:
+            nms.add(re.search(r".*(?=\_\d+$)", nm).group())
+        except AttributeError:
+            pass
+    print("文件列表", nms)
+    if nb in nms:
+        print("重复抓取了博主，直接返回程序")
+        print("抓取的这个博主是", nb)
+        continue
 
 
 def extract_blogger(arg = "feed/dailylook"):
