@@ -152,7 +152,13 @@ def extract_images(image_link_num,user_link,post_id):
 
 def extract_id():
     """获取博主每个帖子对应的id值"""
-    for arg in ["feed/dailylook",'feed/beauty','feed/new','feed/qna']:
+    l = ["feed/dailylook",'feed/beauty','feed/new','feed/qna']
+    dict_cat = {"feed/dailylook":"Image/clothes/",
+                'feed/beauty':"Image/beauty/",
+                "feed/new":"Image/other/",
+                "feed/qna":"Image/other/",
+                "feed/hot":"Image/other/"}
+    for arg in l:
         links = extract_blogger(arg)
         print("博主的数量",len(links))
         # 博主的id
@@ -163,18 +169,12 @@ def extract_id():
             print("博主的链接",user_link)
             # 避免重复存储同一个博主的图片
 
-
-            # 这里再放个函数专门比对是否已经抓取过的博主
-
             # 得到抓取到的博主的名字
             nb = p.search(user_link).group()
             print("用户名是",nb)
             # 博主在目录里
             if  compare_blogger(nb):
                 continue
-
-
-
             params = {
                 "limit": "30",
                 "offset": "0",
@@ -213,8 +213,8 @@ def extract_id():
 
             if len(image_links) >= 100 :
                 # 博主的名字
-                os.mkdir("Image/" + p.search(user_link).group() + "_" + str(len(image_links)))
-                dire = "Image/" + p.search(user_link).group() + "_" + str(len(image_links))
+                os.mkdir(dict_cat[arg] + p.search(user_link).group() + "_" + str(len(image_links)))
+                dire = dict_cat[arg] + p.search(user_link).group() + "_" + str(len(image_links))
                 print("建立博主的目录是", dire)
                 for image_link in image_links:
                     save_image(image_link,os.path.abspath(
