@@ -6,9 +6,10 @@ import sys
 import os
 from contextlib import closing
 import random
-
 import socket
 import socks
+
+
 proxies=  {
     "http": "socks5://127.0.0.1:1080",
     'https': 'socks5://127.0.0.1:1080'
@@ -28,7 +29,6 @@ headers = {
     'x-requested-with':'XMLHttpRequest',
 }
 
-
 def save_image(url,filename):
     """请求链接保存图片"""
     # 请求超时重新请求
@@ -36,12 +36,10 @@ def save_image(url,filename):
     while flag:
         try:
             with closing(requests.get(url, stream=True,timeout=(7, 20))) as r:
-                # time.sleep(random.randint(2,5)/10)
                 flag = False
                 with open(filename, 'wb') as f:
                     for data in r.iter_content(1024):
                         f.write(data)
-                    # print("文件保存成功!")
         except requests.exceptions.ReadTimeout as e:
             print(e)
             print("保存图片时读取超时了")
@@ -52,29 +50,22 @@ def save_image(url,filename):
             print(e)
             print("保存图片时超时了")
 
-
 def compare_blogger(bloggername):
     """比对博主是否是已经抓取过的博主"""
     nb = bloggername
-    # print("nb是",nb)
     nms = set()
-    # # 遍历Image目录下的分类子目录
+    # 遍历Image目录下的分类子目录
     for nm in os.listdir("Image"):
-        # print("nm是",nm)
-        # print(os.path.abspath("Image/"+nm))
         # 获取分类目录下的博主名字
         for i in os.listdir(os.path.abspath("Image/"+nm)):
             try:
                 nms.add(re.search(r".*(?=\_\d+$)", i).group())
             except AttributeError:
                 pass
-        # print("文件列表", nms)
         # 判断一下博主已经抓取过
         if nb in nms:
             print("博主{}已经抓取,直接返回程序".format(nb))
-            # print("抓取的这个博主是", nb)
             return True
-
 
 def extract_blogger(arg = "feed/dailylook"):
     """获取博主主页链接"""
@@ -113,13 +104,8 @@ def extract_blogger(arg = "feed/dailylook"):
         bloggers = bloggers_html.find_all("figure",class_="profile-picture-wrapper")
         for blogger in bloggers:
             # 获取博主主页链接
-            # print("https://www.styleshare.kr" + blogger.find("a").get("href"))
             l.append("https://www.styleshare.kr" + blogger.find("a").get("href"))
             blogger_links.append("https://www.styleshare.kr" + blogger.find("a").get("href"))
-        # print("\n\n")
-        # print("这一页抓取到的博主的主页链接", len(l))
-        # print("总共的链接",len(blogger_links))
-        # print("i是",i)
     return blogger_links
 
 def extract_images(image_link_num,user_link,post_id):
@@ -129,7 +115,6 @@ def extract_images(image_link_num,user_link,post_id):
     url = base_url  + p.search(user_link).group() + "/" + post_id
     # referer
     headers["referer"] = url
-    # time.sleep(random.randint(2, 5) / 10)
     flag = True
     while flag:
         try:
@@ -144,13 +129,11 @@ def extract_images(image_link_num,user_link,post_id):
         except requests.exceptions.ConnectionError as e:
             print(e)
             print("获取帖子时连接错误")
-    # print("帖子的链接",url)
     images = BeautifulSoup(r.text, "lxml")
     # 获取包含图片链接的元素
     image_links = images.find_all("figure", attrs={"class": True, "id": False})
     if len(image_links) == 0 :
         image_links = images.find_all("div",attrs={"class":"pictures op-carousel"})
-    # print("长度是",len(image_links))
     imaglist = []
     for i in image_links:
         try:
@@ -159,24 +142,19 @@ def extract_images(image_link_num,user_link,post_id):
             print("遇到错误",e)
             print("continue,链接是",i)
             continue
-        # print(re.sub(r"\d{2}x\d{2}", "640x640", i.img.get("src")))
-        # print("图片链接",link)
         imaglist.append(link)
-        # print("运行了")
         image_link_num.append(link)
-    # print("这个帖子的图片数量", len(imaglist))
-
-
-
 
 def extract_id():
     """获取博主每个帖子对应的id值"""
     l = ['feed/beauty',"feed/dailylook",'feed/new','feed/qna']
-    dict_cat = {"feed/dailylook":"Image/clothes/",
-                'feed/beauty':"Image/beauty/",
-                "feed/new":"Image/other/",
-                "feed/qna":"Image/other/",
-                "feed/hot":"Image/other/"}
+    dict_cat = {
+        "feed/dailylook":"Image/clothes/",
+        'feed/beauty':"Image/beauty/",
+        "feed/new":"Image/other/",
+        "feed/qna":"Image/other/",
+        "feed/hot":"Image/other/"
+    }
     for arg in l:
         links = extract_blogger(arg)
         print("博主的数量",len(links))
@@ -199,7 +177,6 @@ def extract_id():
             }
             headers["referer"] = user_link
             url = base_url + p.search(user_link).group() + "/styles"
-            # print("请求一个博主的所有的帖子的url是",url)
             # 获取所有的帖子
             list_temp = []
             # 循环获取所有的帖子
@@ -231,8 +208,6 @@ def extract_id():
                 # 没有帖子获取了
                 if len(l) == 0:
                     break
-                #     print("这一次请求帖子数是",len(l))
-                # print("这个博主总共的帖子数是",len(list_temp))
             if len(list_temp) < 12:
                 # 认为帖子数低于15的总图片数量小于100
                 print("帖子数小于15直接跳过不抓取")
@@ -246,7 +221,6 @@ def extract_id():
                 if numb > 30 and numb % 30 == 0:
                     print("现在获取的是第{}张图片".format(numb))
             print("总的图片数",len(image_links))
-
             if len(image_links) >= 100 :
                 # 博主的名字
                 os.mkdir(dict_cat[arg] + p.search(user_link).group() + "_" + str(len(image_links)))
@@ -261,8 +235,6 @@ def extract_id():
                     if image_num > 30 and image_num % 30 == 0:
                         print("正在存储第{}张图片".format(image_num))
                 print("抓取完毕,这是第{}张图片".format(len(image_links)))
-
-            # break
 
 if __name__ == '__main__':
     extract_id()
